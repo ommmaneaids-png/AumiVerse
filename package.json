@@ -1,0 +1,17 @@
+{
+    "name": "aumiverse-worker",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "deploy": "wrangler deploy",
+        "dev": "wrangler dev"
+    },
+    "dependencies": {
+        "@aws-sdk/client-s3": "^3.556.0",
+        "@aws-sdk/s3-request-presigner": "^3.556.0",
+        "itty-router": "^4.0.23"
+    },
+    "devDependencies": {
+        "wrangler": "^3.47.0"
+    }
+}

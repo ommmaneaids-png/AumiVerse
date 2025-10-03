@@ -1,0 +1,9 @@
+name = "aumiverse-api" # CHANGE THIS to your desired worker name
+main = "src/index.js"
+compatibility_date = "2024-04-05"
+
+# This connects your worker to your R2 bucket.
+# The `binding` is how you'll refer to the bucket in your code (env.FILE_BUCKET).
+[[r2_buckets]]
+binding = "FILE_BUCKET"
+bucket_name = "aumiverse" # CHANGE THIS to the name of your R2 bucket

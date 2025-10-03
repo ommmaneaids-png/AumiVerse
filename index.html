@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AumiVerse - File Manager</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "hsl(var(--primary))",
+                            foreground: "hsl(var(--primary-foreground))",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(var(--secondary))",
+                            foreground: "hsl(var(--secondary-foreground))",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(var(--destructive))",
+                            foreground: "hsl(var(--destructive-foreground))",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(var(--muted))",
+                            foreground: "hsl(var(--muted-foreground))",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(var(--accent))",
+                            foreground: "hsl(var(--accent-foreground))",
+                        },
+                        popover: {
+                            DEFAULT: "hsl(var(--popover))",
+                            foreground: "hsl(var(--popover-foreground))",
+                        },
+                        card: {
+                            DEFAULT: "hsl(var(--card))",
+                            foreground: "hsl(var(--card-foreground))",
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white overflow-x-hidden">
+    <!-- Background Effects -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-yellow-400/20 to-orange-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-blue-500/20 to-purple-600/20 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
+    </div>
+
+    <div id="app" class="flex min-h-screen relative z-10">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-black/30 backdrop-blur-2xl border-r border-white/20 p-6 transition-all duration-300 relative z-10">
+            <div class="flex items-center justify-between mb-8">
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+                    AumiVerse
+                </h1>
+                <button id="sidebar-toggle" class="p-2 text-gray-400 hover:text-white transition-colors rounded-lg">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <nav class="mb-8">
+                <a href="#" class="flex items-center gap-3 p-3 rounded-lg bg-yellow-400/10 text-yellow-400 mb-2">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <button id="settings-btn" class="flex items-center gap-3 p-3 rounded-lg text-gray-300 hover:bg-white/5 transition-all w-full text-left">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </button>
+            </nav>
+
+            <div class="space-y-3 mt-auto">
+                <button class="w-full p-3 border border-white/20 rounded-lg bg-transparent text-white hover:bg-white/10 hover:border-white/30 transition-all text-left" onclick="window.open('https://chat.openai.com', '_blank')">
+                    🤖 ChatGPT
+                </button>
+                <button class="w-full p-3 border border-white/20 rounded-lg bg-transparent text-white hover:bg-white/10 hover:border-white/30 transition-all text-left" onclick="window.open('https://chat.deepseek.com', '_blank')">
+                    🧠 DeepSeek
+                </button>
+                <button class="w-full p-3 border border-white/20 rounded-lg bg-transparent text-white hover:bg-white/10 hover:border-white/30 transition-all text-left" onclick="window.open('https://www.aixploria.com/en/', '_blank')">
+                    🚀 Aixploria
+                </button>
+                <button class="w-full p-3 border border-white/20 rounded-lg bg-transparent text-white hover:bg-white/10 hover:border-white/30 transition-all text-left" onclick="window.open('https://classroom.google.com', '_blank')">
+                    📚 Google Classroom
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 overflow-y-auto relative z-10">
+            <!-- Header -->
+            <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
+                <div class="relative flex-1 max-w-md">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" id="search-input" placeholder="Search files..." class="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all">
+                </div>
+                <div class="flex gap-3 items-center">
+                    <button id="filter-btn" class="flex items-center gap-2 px-4 py-3 bg-transparent border border-purple-500/50 rounded-lg text-purple-400 hover:bg-purple-500/10 transition-all">
+                        <span id="filter-text">📁 Show All</span>
+                        <span id="folder-count">(50)</span>
+                    </button>
+                    <select id="sort-select" class="px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 cursor-pointer">
+                        <option value="name">Name</option>
+                        <option value="date">Date</option>
+                        <option value="size">Size</option>
+                    </select>
+                    <button id="view-toggle" class="flex items-center gap-2 px-4 py-3 bg-transparent border border-purple-500/50 rounded-lg text-purple-400 hover:bg-purple-500/10 transition-all">
+                        <i class="fas fa-th" id="view-icon"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Folders Grid -->
+            <div class="mt-8">
+                <h2 class="text-xl font-semibold mb-4 text-white">
+                    Folders
+                    <span id="folder-stats" class="text-purple-400 text-sm font-normal ml-2"></span>
+                </h2>
+                <div id="folders-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <!-- Folders will be dynamically generated here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Folder View Modal -->
+    <div id="folder-modal" class="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 hidden items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-600 rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start p-6 border-b border-slate-600">
+                <div>
+                    <h2 id="folder-title" class="text-2xl font-bold bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent mb-1">
+                        📁 Folder Name
+                    </h2>
+                    <p id="folder-stats-text" class="text-sm text-gray-400">Storage info</p>
+                </div>
+                <button id="close-folder" class="px-6 py-3 bg-transparent border border-red-500/50 rounded-lg text-red-400 hover:bg-red-500/10 transition-all">
+                    Close Folder
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-6 border-b border-slate-600">
+                <button id="create-text-btn" class="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all font-medium">
+                    <i class="fas fa-file-text"></i>
+                    Create Text File
+                </button>
+                <div class="upload-container">
+                    <input type="file" id="file-upload" class="hidden" accept=".jpg,.jpeg,.png,.webp,.gif,.mp3,.wav,.m4a,.mp4,.webm,.mov,.pdf,.docx,.txt,.csv,.xlsx,.zip,.rar">
+                    <button id="upload-btn" class="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all font-medium w-full">
+                        <i class="fas fa-upload"></i>
+                        Upload File
+                    </button>
+                </div>
+                <button id="clear-all-btn" class="flex items-center justify-center gap-2 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all font-medium">
+                    <i class="fas fa-trash"></i>
+                    Clear All Files
+                </button>
+            </div>
+
+            <div id="folder-files" class="p-6 min-h-[300px]">
+                <div id="empty-state" class="text-center py-12">
+                    <i class="fas fa-file-text text-6xl text-gray-400 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-white mb-2">No files yet</h3>
+                    <p class="text-gray-400 mb-2">Create a text file or upload a file to get started</p>
+                    <p class="text-sm text-gray-500">Supported formats: Images, Videos, Audio, Documents, Archives (up to 100MB per file)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Text Editor Modal -->
+    <div id="text-editor-modal" class="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 hidden items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-600 rounded-xl w-full max-w-4xl h-[90vh] flex flex-col">
+            <div class="p-6 border-b border-slate-600">
+                <h3 id="editor-title" class="text-xl text-yellow-400 font-semibold mb-2 flex items-center gap-2">
+                    <i class="fas fa-file-text"></i> Notepad - New Document
+                </h3>
+                <div class="flex gap-4 text-sm text-gray-400">
+                    <span id="char-count">Characters: 0</span>
+                    <span id="word-count">Words: 0</span>
+                    <span id="line-count">Lines: 1</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 px-6 py-2 bg-slate-700 border-b border-slate-600">
+                <button id="new-text-btn" class="px-3 py-1 text-gray-300 hover:bg-slate-600 rounded transition-all">New</button>
+                <button id="save-text-btn" class="px-3 py-1 text-gray-300 hover:bg-slate-600 rounded transition-all">Save</button>
+                <button id="export-text-btn" class="px-3 py-1 text-gray-300 hover:bg-slate-600 rounded transition-all">Export</button>
+                <div class="w-px h-6 bg-slate-600 mx-2"></div>
+                <button id="copy-all-btn" class="px-3 py-1 text-gray-300 hover:bg-slate-600 rounded transition-all">Copy All</button>
+                <button id="paste-btn" class="px-3 py-1 text-gray-300 hover:bg-slate-600 rounded transition-all">Paste</button>
+            </div>
+
+            <div class="flex-1 p-4 bg-white text-black rounded-lg m-4 border-2 border-slate-600">
+                <textarea id="text-content" placeholder="Start typing your text here..." class="w-full h-full min-h-[500px] bg-transparent border-none outline-none resize-none font-mono text-sm leading-relaxed text-black"></textarea>
+            </div>
+
+            <div class="flex justify-between items-center p-6 border-t border-slate-600">
+                <div class="flex gap-3">
+                    <button id="save-document-btn" class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all font-medium">
+                        <i class="fas fa-save"></i>
+                        Save Document
+                    </button>
+                    <button id="close-editor-btn" class="px-4 py-2 bg-transparent border border-slate-600 text-white hover:bg-slate-600 rounded-lg transition-all">
+                        Close
+                    </button>
+                </div>
+                <div class="text-sm text-gray-400">Auto-save: Enabled</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unlock Modal -->
+    <div id="unlock-modal" class="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 hidden items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-600 rounded-xl w-full max-w-md">
+            <div class="p-6 border-b border-slate-600">
+                <h3 id="unlock-title" class="text-xl text-cyan-400 font-semibold flex items-center gap-2">
+                    🔐 Unlock Galaxy - Folder Name
+                </h3>
+            </div>
+            <div class="p-6 bg-cyan-500/10 border border-cyan-500/20 rounded-lg m-6">
+                <p class="text-orange-400 font-medium mb-2">🔐 Slot Protected</p>
+                <p class="text-gray-300">This slot is protected. Please enter the slot password to proceed.</p>
+            </div>
+            <form id="unlock-form" class="px-6 pb-6">
+                <div class="mb-4">
+                    <label for="unlock-password" class="block text-sm font-medium mb-2 text-white">Slot Password</label>
+                    <input type="password" id="unlock-password" placeholder="Enter slot password" required class="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all">
+                </div>
+                <div class="flex gap-3">
+                    <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all font-medium">
+                        🔓 Unlock Slot
+                    </button>
+                    <button type="button" id="cancel-unlock" class="px-4 py-2 bg-transparent border border-slate-600 text-white hover:bg-slate-600 rounded-lg transition-all">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 hidden items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-600 rounded-xl w-full max-w-2xl">
+            <div class="p-6 border-b border-slate-600">
+                <h3 class="text-xl font-semibold flex items-center gap-2">
+                    <i class="fas fa-cog"></i> Settings
+                </h3>
+            </div>
+            <div class="p-6 max-h-96 overflow-y-auto">
+                <div class="mb-8">
+                    <h4 class="text-white text-lg font-semibold mb-4">Theme</h4>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-gray-300 text-sm">Dark Mode</span>
+                        <label class="relative inline-block w-11 h-6">
+                            <input type="checkbox" id="dark-mode-toggle" class="opacity-0 w-0 h-0">
+                            <span class="slider absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-slate-600 transition-all duration-300 rounded-full before:absolute before:content-[''] before:h-4 before:w-4 before:left-1 before:bottom-1 before:bg-white before:transition-all before:duration-300 before:rounded-full"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <h4 class="text-white text-lg font-semibold mb-4">View</h4>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-gray-300 text-sm">List View</span>
+                        <label class="relative inline-block w-11 h-6">
+                            <input type="checkbox" id="list-view-toggle" class="opacity-0 w-0 h-0">
+                            <span class="slider absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-slate-600 transition-all duration-300 rounded-full before:absolute before:content-[''] before:h-4 before:w-4 before:left-1 before:bottom-1 before:bg-white before:transition-all before:duration-300 before:rounded-full"></span>
+                        </label>
+                    </div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-gray-300 text-sm">Hover Effects</span>
+                        <label class="relative inline-block w-11 h-6">
+                            <input type="checkbox" id="hover-effects-toggle" checked class="opacity-0 w-0 h-0">
+                            <span class="slider absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-slate-600 transition-all duration-300 rounded-full before:absolute before:content-[''] before:h-4 before:w-4 before:left-1 before:bottom-1 before:bg-white before:transition-all before:duration-300 before:rounded-full"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <h4 class="text-white text-lg font-semibold mb-4">Storage & Upload Info</h4>
+                    <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 mb-4">
+                        <h5 class="text-blue-400 font-medium mb-2">💾 Secure Storage System</h5>
+                        <ul class="list-none p-0">
+                            <li class="text-gray-300 text-sm mb-1 pl-2 before:content-['•'] before:text-blue-400 before:mr-2">File size limit: 100MB per file</li>
+                            <li class="text-gray-300 text-sm mb-1 pl-2 before:content-['•'] before:text-blue-400 before:mr-2">Folder limit: 100MB per folder</li>
+                            <li class="text-gray-300 text-sm mb-1 pl-2 before:content-['•'] before:text-blue-400 before:mr-2"><strong>NO automatic file deletion</strong> - user control only</li>
+                            <li class="text-gray-300 text-sm mb-1 pl-2 before:content-['•'] before:text-blue-400 before:mr-2">Warning only when storage EXCEEDS 100MB</li>
+                            <li class="text-gray-300 text-sm mb-1 pl-2 before:content-['•'] before:text-blue-400 before:mr-2">Files persist permanently until manually deleted by user</li>
+                        </ul>
+                    </div>
+                    <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 mb-4">
+                        <h5 class="text-blue-400 font-medium mb-2">📁 Supported File Types</h5>
+                        <ul class="list-none p-0">
+                            <li class="text-gray-300 text-sm mb-1 pl-2 before:content-['•'] before:text-blue-400 before:mr-2">Images: .jpg, .jpeg, .png, .webp, .gif (with preview)</li>
+                            <li class="text-gray-300 text-sm mb-1 pl-2 before:content-['•'] before:text-blue-400 before:mr-2">Videos: .mp4, .webm, .mov (stored without preview)</li>
+                            <li class="text-gray-300 text-sm mb-1 pl-2 before:content-['•'] before:text-blue-400 before:mr-2">Audio: .mp3, .wav, .m4a (with audio player)</li>
+                            <li class="text-gray-300 text-sm mb-1 pl-2 before:content-['•'] before:text-blue-400 before:mr-2">Documents: .pdf, .docx, .txt, .csv, .xlsx</li>
+                            <li class="text-gray-300 text-sm mb-1 pl-2 before:content-['•'] before:text-blue-400 before:mr-2">Archives: .zip, .rar</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 border-t border-slate-600 flex justify-end">
+                <button id="close-settings" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all font-medium">
+                    Save Settings
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
